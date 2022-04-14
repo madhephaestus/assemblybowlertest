@@ -21,25 +21,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.transform.Affine
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-Log.enableSystemPrint(true)
-CSG addAssemblyStep(CSG incoming, int stepNumber, Transform explodedPose) {
-	String key = "AssemblySteps"
-	PropertyStorage incomingGetStorage = incoming.getStorage()
-	if(incomingGetStorage.getValue(key)==Optional.empty()) {
-		HashMap<Integer,Transform> map= new HashMap<>();
-		incomingGetStorage.set(key, map);
-	}
-	if(incomingGetStorage.getValue("MaxAssemblyStep")==Optional.empty()) {
-		incomingGetStorage.set("MaxAssemblyStep", Integer.valueOf(stepNumber));
-	}
-	Integer max = incomingGetStorage.getValue("MaxAssemblyStep").get()
-	if(stepNumber>max.intValue()) {
-		incomingGetStorage.set("MaxAssemblyStep", Integer.valueOf(stepNumber));
-	}
-	HashMap<Integer,Transform> map=incomingGetStorage.getValue(key).get()
-	map.put(stepNumber, explodedPose)
-	return incoming
-}
+
 Slider getSlider(ArrayList<CSG> listOfObjects) {
 	int numSteps=0
 	for(CSG c:listOfObjects) {
@@ -48,9 +30,7 @@ Slider getSlider(ArrayList<CSG> listOfObjects) {
 			Integer max = incomingGetStorage.getValue("MaxAssemblyStep").get()
 			if(max>numSteps) {
 				numSteps=max
-			}
-			c.setManipulator(new Affine())
-			
+			}				
 		}
 	}
 	
@@ -79,13 +59,13 @@ Slider getSlider(ArrayList<CSG> listOfObjects) {
 							def myScale= (i==step)?fraction:1
 							def scaled =TransformFactory.csgToNR(map.get(i)).scale(myScale)
 							target=target.times(scaled)
-							println c.getName()+" sliderval="+newValue+" step="+step+" fraction:"+myScale+" || "+i						
-							TransformFactory.nrToAffine(target,c.getManipulator());
+							//println c.getName()+" sliderval="+newValue+" step="+step+" fraction:"+myScale+" || "+i						
+							TransformFactory.nrToAffine(target,incomingGetStorage.getValue("AssembleAffine").get());
 							set=true;
 						}
 					}
 					if(!set) {
-						TransformFactory.nrToAffine(new TransformNR(),c.getManipulator());
+						TransformFactory.nrToAffine(new TransformNR(),incomingGetStorage.getValue("AssembleAffine").get());
 					}
 					
 				}
@@ -119,11 +99,13 @@ CSG hex = new Hexagon(	20, // Flat to flat radius
                       		).toCSG()//convert to CSG to display                    			 
                       		.movex(50)
                       		.movey(50)
-addAssemblyStep(hex, 1, new Transform().movez(30))
-addAssemblyStep(pyramid, 2, new Transform().roty(90))
-addAssemblyStep(pyramid, 3, new Transform().movez(30))
-addAssemblyStep(myCylinder, 3, new Transform().movez(30))
-addAssemblyStep(simpleSyntax, 4, new Transform().movez(30))
+hex.addAssemblyStep( 2, new Transform().movez(30))
+hex.addAssemblyStep( 1, new Transform().movex(30))
+pyramid.addAssemblyStep( 4, new Transform().roty(90))
+pyramid.addAssemblyStep( 5, new Transform().movez(30))
+myCylinder.addAssemblyStep(5, new Transform().movez(30))
+simpleSyntax.addAssemblyStep( 3, new Transform().movez(30))
+
 hex.setName("Hex")
 pyramid.setName("pyramid")
 myCylinder.setName("myCylinder")
