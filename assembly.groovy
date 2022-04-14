@@ -139,4 +139,7 @@ Slider slider = getSlider(listOfObjects)
 //add content to the tab
 myTab.setContent(slider);
 
-return [listOfObjects,myTab]                      		
+return [listOfObjects,myTab]
+
+
+                      		
